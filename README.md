@@ -1,5 +1,7 @@
 # lightline-gitdiff
 
+*This is [niklaas/lightline-gitdiff] updated to use the asynchronous `jobstart` API in [neovim/neovim][Neovim]. It shaves a lot of time off startup.*
+
 I had been using [airblade/vim-gitgutter][gitgutter] for a while, however, I
 felt distracted by the indicators shown in the sign column in the end. That
 said, I wanted some lightweight signal indicating whether the current file
