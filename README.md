@@ -1,4 +1,4 @@
-# lightline-gitdiff
+# lightline-gitdiff-async
 
 *This is [niklaas/lightline-gitdiff](https://github.comniklaas/lightline-gitdiff) updated to use the asynchronous `jobstart` API in [neovim/neovim](https://github.com/neovim/neovim). It shaves a lot of time off startup.*
 
