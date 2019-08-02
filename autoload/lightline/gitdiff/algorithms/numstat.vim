@@ -5,7 +5,7 @@ function! lightline#gitdiff#algorithms#numstat#calculate(buffer, Callback) abort
   if !lightline#gitdiff#utils#is_git_exectuable()
     return function(a:Callback)({})
   endif
-  call lightline#gitdiff#utils#is_inside_work_tree(a:buffer, { workTree -> lightline#gitdiff#algorithms#numstat#calculate_detect_callback(a:buffer, a:Callback, workTree) })
+  call lightline#gitdiff#utils#is_inside_work_tree(a:buffer, function('lightline#gitdiff#algorithms#numstat#calculate_detect_callback',[a:buffer, a:Callback]))
 endfunction
 
 function! lightline#gitdiff#algorithms#numstat#calculate_detect_callback(buffer, Callback, inWorkTree) abort
@@ -19,6 +19,9 @@ function! lightline#gitdiff#algorithms#numstat#calculate_detect_callback(buffer,
           \ . ' && git diff --no-ext-diff --numstat -- '
           \ . expand('#' . a:buffer . ':t:S')), {'on_stdout': {j,d,e -> len(d) == 0 ? e : lightline#gitdiff#algorithms#numstat#calculate_callback(a:Callback, split(d[0]))}})
   else
+    " call job_start(system('cd ' . expand('#' . a:buffer . ':p:h:S')
+    "       \ . ' && git diff --no-ext-diff --numstat -- '
+    "       \ . expand('#' . a:buffer . ':t:S')), {'out_cb': {j,d,e -> len(d) == 0 ? e : lightline#gitdiff#algorithms#numstat#calculate_callback(a:Callback, split(d[0]))}})
     let l:stats = split(system('cd ' . expand('#' . a:buffer . ':p:h:S')
       \ . ' && git diff --no-ext-diff --numstat -- '
       \ . expand('#' . a:buffer . ':t:S')))

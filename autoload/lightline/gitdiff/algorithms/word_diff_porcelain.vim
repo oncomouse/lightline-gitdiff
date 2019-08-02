@@ -5,7 +5,7 @@ function! lightline#gitdiff#algorithms#word_diff_porcelain#calculate(buffer, Cal
   if !lightline#gitdiff#utils#is_git_exectuable()
     return function(a:Callback)({})
   endif
-  call lightline#gitdiff#utils#is_inside_work_tree(a:buffer, { workTree -> lightline#gitdiff#algorithms#word_diff_porcelain#calculate_detect_callback(a:buffer, a:Callback, workTree) })
+  call lightline#gitdiff#utils#is_inside_work_tree(a:buffer, function('lightline#gitdiff#algorithms#word_diff_porcelain#calculate_detect_callback',[a:buffer, a:Callback]))
 endfunction
 
 function! lightline#gitdiff#algorithms#word_diff_porcelain#calculate_detect_callback(buffer, Callback, inWorkTree) abort
@@ -13,10 +13,10 @@ function! lightline#gitdiff#algorithms#word_diff_porcelain#calculate_detect_call
     " b/c there is nothing that can be done here; the algorithm needs git
     return function(a:Callback)({})
   endif
-  call s:get_diff_porcelain(a:buffer, { porcelain -> lightline#gitdiff#algorithms#word_diff_porcelain#calculate_callback(porcelain, a:Callback) })
+  call s:get_diff_porcelain(a:buffer, function('lightline#gitdiff#algorithms#word_diff_porcelain#calculate_callback',[a:Callback]))
 endfunction
 
-function! lightline#gitdiff#algorithms#word_diff_porcelain#calculate_callback(porcelain, Callback) abort
+function! lightline#gitdiff#algorithms#word_diff_porcelain#calculate_callback(Callback, porcelain) abort
   if len(a:porcelain) == 0
     return
   endif
@@ -52,6 +52,8 @@ function! s:get_diff_porcelain(buffer, Callback) abort
     call jobstart('cd ' . expand('#' . a:buffer . ':p:h:S') .
           \ ' && git diff --no-ext-diff --word-diff=porcelain --unified=0 -- ' . expand('#' . a:buffer . ':t:S'), { 'on_stdout': {j,d,e -> a:Callback( d[4:-2]) }})
   else
+    " call job_start('cd ' . expand('#' . a:buffer . ':p:h:S') .
+    "       \ ' && git diff --no-ext-diff --word-diff=porcelain --unified=0 -- ' . expand('#' . a:buffer . ':t:S'), { 'out_cb': {j,d -> a:Callback( d[4:-2]) }})
     let l:porcelain = systemlist('cd ' . expand('#' . a:buffer . ':p:h:S') .
           \ ' && git diff --no-ext-diff --word-diff=porcelain --unified=0 -- ' . expand('#' . a:buffer . ':t:S'))
     return function(a:Callback)(l:porcelain[4:])
