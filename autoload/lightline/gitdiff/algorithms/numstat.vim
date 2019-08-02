@@ -17,7 +17,7 @@ function! lightline#gitdiff#algorithms#numstat#calculate_detect_callback(buffer,
   if has('neovim')
     call jobstart(system('cd ' . expand('#' . a:buffer . ':p:h:S')
           \ . ' && git diff --no-ext-diff --numstat -- '
-          \ . expand('#' . a:buffer . ':t:S')), {'on_stdout': {j,d,e -> lightline#gitdiff#algorithms#numstat#calculate_callback(a:Callback, split(d[0]))}})
+          \ . expand('#' . a:buffer . ':t:S')), {'on_stdout': {j,d,e -> len(d) == 0 ? e : lightline#gitdiff#algorithms#numstat#calculate_callback(a:Callback, split(d[0]))}})
   else
     let l:stats = split(system('cd ' . expand('#' . a:buffer . ':p:h:S')
       \ . ' && git diff --no-ext-diff --numstat -- '
@@ -26,9 +26,6 @@ function! lightline#gitdiff#algorithms#numstat#calculate_detect_callback(buffer,
   endif
 endfunction
 function! lightline#gitdiff#algorithms#numstat#calculate_callback(Callback, stats) abort
-  if len(a:stats) == 0
-    return
-  endif
   if len(a:stats) < 2 || join(a:stats[:1], '') !~# '^\d\+$'
     " b/c there are no changes made, the file is untracked or some error
     " occured
