@@ -29,9 +29,13 @@ function! lightline#gitdiff#utils#group_at(f, list, borders) abort
   return l:grouped_list
 endfunction
 
-function! lightline#gitdiff#utils#is_inside_work_tree(buffer) abort "{{{1
-  call system('cd ' . expand('#' . a:buffer . ':p:h:S') . ' && git rev-parse --is-inside-work-tree --prefix ' . expand('#' . a:buffer . ':h:S'))
-  return !v:shell_error
+function! lightline#gitdiff#utils#is_inside_work_tree(buffer, Callback) abort "{{{1
+  if has('nvim')
+    call jobstart('cd ' . expand('#' . a:buffer . ':p:h:S') . ' && git rev-parse --is-inside-work-tree --prefix ' . expand('#' . a:buffer . ':h:S'), { 'on_stdout': {j,d,e -> len(d) != 0 ? function(a:Callback)(!e) : e} })
+  else
+    call system('cd ' . expand('#' . a:buffer . ':p:h:s') . ' && git rev-parse --is-inside-work-tree --prefix ' . expand('#' . a:buffer . ':h:s'))
+    return function(a:Callback)(!v:shell_error)
+  endif
 endfunction
 
 function! lightline#gitdiff#utils#is_git_exectuable() abort "{{{1

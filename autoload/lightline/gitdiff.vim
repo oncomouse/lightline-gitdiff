@@ -1,5 +1,8 @@
 function! lightline#gitdiff#get() abort
-  return lightline#gitdiff#format(g:lightline#gitdiff#cache[bufnr('%')])
+  if has_key(g:lightline#gitdiff#cache, bufnr('%'))
+    return lightline#gitdiff#format(g:lightline#gitdiff#cache[bufnr('%')])
+  endif
+  return ''
 endfunction
 
 " update() {{{1 is the entry point for *writing* changes of the current buffer
@@ -38,8 +41,12 @@ function! lightline#gitdiff#write_calculation_to_cache(buffer, soft) abort
   endif
 
   let l:Calculation = get(g:, 'lightline#gitdiff#algorithm',
-        \ { buffer -> lightline#gitdiff#algorithms#word_diff_porcelain#calculate(buffer) })
-  let g:lightline#gitdiff#cache[a:buffer] = l:Calculation(a:buffer)
+        \ { buffer,callback -> lightline#gitdiff#algorithms#word_diff_porcelain#calculate(buffer, callback) })
+  call lightline#gitdiff#algorithms#word_diff_porcelain#calculate(a:buffer, { diff -> lightline#gitdiff#write_calculation_to_cache_callback(a:buffer, diff) })
+endfunction
+
+function! lightline#gitdiff#write_calculation_to_cache_callback(buffer, diff) abort
+  let g:lightline#gitdiff#cache[a:buffer] = a:diff
 endfunction
 
 " format() {{{1 returns the calculated changes of the current buffer in a
