@@ -31,7 +31,7 @@ endfunction
 
 function! lightline#gitdiff#utils#is_inside_work_tree(buffer, Callback) abort "{{{1
   if has('nvim')
-    call jobstart('cd ' . expand('#' . a:buffer . ':p:h:S') . ' && git rev-parse --is-inside-work-tree --prefix ' . expand('#' . a:buffer . ':h:S'), { 'on_stdout': {j,d,e -> len(d) != 0 ? function(a:Callback)(!e) : e} })
+    call jobstart('cd ' . expand('#' . a:buffer . ':p:h:S') . ' && git rev-parse --is-inside-work-tree --prefix ' . expand('#' . a:buffer . ':h:S'), { 'on_exit': {j,d,e -> function(a:Callback)(!d) }})
   else
     call system('cd ' . expand('#' . a:buffer . ':p:h:s') . ' && git rev-parse --is-inside-work-tree --prefix ' . expand('#' . a:buffer . ':h:s'))
     return function(a:Callback)(!v:shell_error)
