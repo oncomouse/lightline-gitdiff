@@ -1,6 +1,6 @@
 # lightline-gitdiff
 
-*This is [niklaas/lightline-gitdiff] updated to use the asynchronous `jobstart` API in [neovim/neovim][Neovim]. It shaves a lot of time off startup.*
+*This is [niklaas/lightline-gitdiff](https://github.comniklaas/lightline-gitdiff) updated to use the asynchronous `jobstart` API in [neovim/neovim](https://github.com/neovim/neovim). It shaves a lot of time off startup.*
 
 I had been using [airblade/vim-gitgutter][gitgutter] for a while, however, I
 felt distracted by the indicators shown in the sign column in the end. That
