@@ -17,9 +17,6 @@ function! lightline#gitdiff#algorithms#word_diff_porcelain#calculate_detect_call
 endfunction
 
 function! lightline#gitdiff#algorithms#word_diff_porcelain#calculate_callback(Callback, porcelain) abort
-  if len(a:porcelain) == 0
-    return
-  endif
   let l:indicator_groups = s:transcode_diff_porcelain(a:porcelain)
 
   let l:changes = map(copy(l:indicator_groups), { idx, val ->
@@ -47,23 +44,29 @@ endfunction
 
 " get_diff_porcelain {{{1 returns the output of git's word-diff as list. The
 " header of the diff is removed b/c it is not needed.
-function! s:porcelain_buf_handler(bufname, Callback) abort
-  let l:buflines = getbufline(bufnr(a:bufname), 1, '$')
-  try
-    execute('bdelete '.bufnr(a:bufname))
-  catch
-  endtry
-  return function(a:Callback)(l:buflines[4:])
+function! s:buf_handler(bufnameOrOutput, Callback) abort
+  if has('nvim')
+    return function(a:Callback)(a:bufnameOrOutput[0][4:-3])
+  else
+    let l:buflines = getbufline(bufnr(a:bufnameOrOutput), 1, '$')
+    try
+      execute('bdelete! '.bufnr(a:bufnameOrOutput))
+    catch
+    endtry
+    let l:output = l:buflines[4:]
+    return function(a:Callback)(l:output)
+  endif
 endfunction
 
 function! s:get_diff_porcelain(buffer, Callback) abort
-  let l:bufname = tempname()
   if has('nvim')
+    let l:out = []
     call jobstart('cd ' . expand('#' . a:buffer . ':p:h:S') .
-          \ ' && git diff --no-ext-diff --word-diff=porcelain --unified=0 -- ' . expand('#' . a:buffer . ':t:S'), { 'on_stdout': {j,d,e -> a:Callback( d[4:-2]) }})
+          \ ' && git diff --no-ext-diff --word-diff=porcelain --unified=0 -- ' . expand('#' . a:buffer . ':t:S'), { 'on_stdout': {j,d,e -> add(l:out, d) }, 'on_exit': {-> <SID>buf_handler(l:out, a:Callback)}})
   else
+    let l:bufname = tempname()
     call job_start('bash -c "cd ' . expand('#' . a:buffer . ':p:h:S') .
-          \ ' && git diff --no-ext-diff --word-diff=porcelain --unified=0 -- ' . expand('#' . a:buffer . ':t:S').'"', { 'out_io': 'buffer', 'out_name': l:bufname, 'exit_cb': {-> <SID>porcelain_buf_handler(l:bufname, a:Callback)}})
+          \ ' && git diff --no-ext-diff --word-diff=porcelain --unified=0 -- ' . expand('#' . a:buffer . ':t:S').'"', { 'out_io': 'buffer', 'out_name': l:bufname, 'exit_cb': {-> <SID>buf_handler(l:bufname, a:Callback)}})
   endif
 endfunction
 

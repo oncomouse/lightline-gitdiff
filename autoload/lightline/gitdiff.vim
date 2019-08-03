@@ -41,8 +41,8 @@ function! lightline#gitdiff#write_calculation_to_cache(buffer, soft) abort
   endif
 
   let l:Calculation = get(g:, 'lightline#gitdiff#algorithm',
-        \ { buffer,callback -> lightline#gitdiff#algorithms#word_diff_porcelain#calculate(buffer, callback) })
-  call lightline#gitdiff#algorithms#word_diff_porcelain#calculate(a:buffer, { diff -> lightline#gitdiff#write_calculation_to_cache_callback(a:buffer, diff) })
+        \ { buffer,cb -> lightline#gitdiff#algorithms#word_diff_porcelain#calculate(buffer, cb) })
+  call lightline#gitdiff#algorithms#word_diff_porcelain#calculate(a:buffer, function('lightline#gitdiff#write_calculation_to_cache_callback', [a:buffer]))
 endfunction
 
 function! lightline#gitdiff#write_calculation_to_cache_callback(buffer, diff) abort
