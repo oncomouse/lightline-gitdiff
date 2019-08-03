@@ -47,16 +47,23 @@ endfunction
 
 " get_diff_porcelain {{{1 returns the output of git's word-diff as list. The
 " header of the diff is removed b/c it is not needed.
+function! s:porcelain_buf_handler(bufname, Callback) abort
+  let l:buflines = getbufline(bufnr(a:bufname), 1, '$')
+  try
+    execute('bdelete '.bufnr(a:bufname))
+  catch
+  endtry
+  return function(a:Callback)(l:buflines[4:])
+endfunction
+
 function! s:get_diff_porcelain(buffer, Callback) abort
+  let l:bufname = tempname()
   if has('nvim')
     call jobstart('cd ' . expand('#' . a:buffer . ':p:h:S') .
           \ ' && git diff --no-ext-diff --word-diff=porcelain --unified=0 -- ' . expand('#' . a:buffer . ':t:S'), { 'on_stdout': {j,d,e -> a:Callback( d[4:-2]) }})
   else
-    " call job_start('cd ' . expand('#' . a:buffer . ':p:h:S') .
-    "       \ ' && git diff --no-ext-diff --word-diff=porcelain --unified=0 -- ' . expand('#' . a:buffer . ':t:S'), { 'out_cb': {j,d -> a:Callback( d[4:-2]) }})
-    let l:porcelain = systemlist('cd ' . expand('#' . a:buffer . ':p:h:S') .
-          \ ' && git diff --no-ext-diff --word-diff=porcelain --unified=0 -- ' . expand('#' . a:buffer . ':t:S'))
-    return function(a:Callback)(l:porcelain[4:])
+    call job_start('bash -c "cd ' . expand('#' . a:buffer . ':p:h:S') .
+          \ ' && git diff --no-ext-diff --word-diff=porcelain --unified=0 -- ' . expand('#' . a:buffer . ':t:S').'"', { 'out_io': 'buffer', 'out_name': l:bufname, 'exit_cb': {-> <SID>porcelain_buf_handler(l:bufname, a:Callback)}})
   endif
 endfunction
 
