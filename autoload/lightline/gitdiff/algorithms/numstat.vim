@@ -10,7 +10,7 @@ endfunction
 
 function! s:buf_handler(bufnameOrOutput, Callback) abort
   if has('nvim')
-    return function(a:Callback)(a:bufnameOrOutput[0][4:-3])
+    return function(a:Callback)(a:bufnameOrOutput[0][4:-2])
   else
     let l:buflines = getbufline(bufnr(a:bufnameOrOutput), 1, '$')
     try
