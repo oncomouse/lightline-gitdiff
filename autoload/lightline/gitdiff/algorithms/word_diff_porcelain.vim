@@ -46,7 +46,11 @@ endfunction
 " header of the diff is removed b/c it is not needed.
 function! s:buf_handler(bufnameOrOutput, Callback) abort
   if has('nvim')
-    return function(a:Callback)(a:bufnameOrOutput[0][4:-2])
+    if len(a:bufnameOrOutput) > 0
+      return function(a:Callback)(a:bufnameOrOutput[0][4:-2])
+    else
+      return []
+    endif
   else
     let l:buflines = getbufline(bufnr(a:bufnameOrOutput), 1, '$')
     try
